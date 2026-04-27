@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Branddi · Calendário 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b1220;
+    --bg-2: #0f1a2e;
+    --panel: #16243d;
+    --panel-2: #1c2c48;
+    --line: #233655;
+    --line-soft: #1c2c48;
+    --ink: #e8eef9;
+    --ink-soft: #b8c5dc;
+    --ink-muted: #7a8aa8;
+
+    --c-feriado: #ef4444;
+    --c-recesso: #f97316;
+    --c-ferias:  #06b6d4;
+    --c-dayoff:  #a855f7;
+    --c-evento:  #22c55e;
+
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at top left, rgba(6,182,212,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(168,85,247,0.06) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+    padding: 24px 32px;
+  }
+  .header-inner {
+    max-width: 1500px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand-mark {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 20px; color: #03171c;
+    box-shadow: 0 4px 16px rgba(6,182,212,0.3);
+  }
+  .brand-text h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+  .brand-text .sub { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+
+  .controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: '▾';
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    pointer-events: none; font-size: 11px; color: var(--ink-muted);
+  }
+  select.filter, button.btn {
+    appearance: none; -webkit-appearance: none;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    padding: 10px 38px 10px 16px;
+    font-family: inherit; font-size: 13px; font-weight: 500;
+    border-radius: var(--radius); cursor: pointer;
+    transition: all 0.18s ease;
+    min-width: 240px;
+  }
+  button.btn { padding: 10px 18px; min-width: 0; }
+  button.btn:hover, select.filter:hover { border-color: var(--c-ferias); background: var(--panel-2); }
+  button.btn.primary {
+    background: var(--c-ferias); color: #03171c;
+    border-color: var(--c-ferias); font-weight: 600;
+  }
+  button.btn.primary:hover { background: #22d3ee; border-color: #22d3ee; }
+
+  /* LEGENDA */
+  .legend-bar {
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 32px;
+  }
+  .legend-inner {
+    max-width: 1500px; margin: 0 auto;
+    display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+  }
+  .legend-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+    color: var(--ink-muted); text-transform: uppercase;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--ink-soft);
+  }
+  .legend-dot { width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0; }
+  .legend-dot.feriado { background: var(--c-feriado); }
+  .legend-dot.recesso { background: var(--c-recesso); }
+  .legend-dot.ferias  { background: var(--c-ferias); }
+  .legend-dot.dayoff  { background: var(--c-dayoff); }
+  .legend-dot.evento  { background: var(--c-evento); }
+
+  /* LAYOUT */
+  .layout {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 28px 32px 60px;
+  }
+
+  /* ANUAL */
+  .annual-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+  .month-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .month-card:hover {
+    border-color: var(--c-ferias);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(6,182,212,0.2);
+  }
+  .month-name {
+    text-align: center;
+    font-size: 13px; font-weight: 700; letter-spacing: 0.12em;
+    color: var(--c-ferias); text-transform: uppercase;
+    margin-bottom: 12px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .mini-cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .mini-cal .dow {
+    font-size: 10px; text-align: center;
+    color: var(--ink-muted); font-weight: 600;
+    padding: 4px 0; text-transform: uppercase;
+  }
+  .mini-cal .day {
+    font-size: 11px; font-weight: 500; text-align: center;
+    padding: 6px 0; border-radius: 5px;
+    color: var(--ink-soft);
+    aspect-ratio: 1;
+    display: flex; align-items: center; justify-content: center;
+    font-variant-numeric: tabular-nums;
+    cursor: default; position: relative;
+    background: var(--bg-2);
+    transition: transform 0.12s ease;
+  }
+  .mini-cal .day.empty { background: transparent; color: var(--ink-muted); opacity: 0.35; }
+  .mini-cal .day.has-event { color: #fff; font-weight: 700; }
+  .mini-cal .day.has-event:hover { transform: scale(1.15); z-index: 5; }
+  .mini-cal .day.feriado { background: var(--c-feriado); }
+  .mini-cal .day.recesso { background: var(--c-recesso); }
+  .mini-cal .day.ferias  { background: var(--c-ferias); color: #03171c; }
+  .mini-cal .day.dayoff  { background: var(--c-dayoff); }
+  .mini-cal .day.evento  { background: var(--c-evento); color: #052e0f; }
+  .mini-cal .day.collab-match {
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--c-ferias);
+    z-index: 4;
+  }
+
+  .ferias-banner {
+    margin-top: 10px; padding: 7px 10px;
+    border-radius: var(--radius-sm);
+    background: rgba(6,182,212,0.12);
+    border: 1px solid rgba(6,182,212,0.35);
+    font-size: 11px; color: #67e8f9;
+    font-weight: 600;
+    display: flex; align-items: center; gap: 6px;
+    cursor: help; line-height: 1.3;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: sticky; top: 24px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px;
+  }
+  .panel-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+    color: var(--ink-muted); text-transform: uppercase;
+    margin-bottom: 14px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .events-list {
+    display: flex; flex-direction: column; gap: 0;
+    max-height: 520px; overflow-y: auto;
+  }
+  .event-item {
+    display: flex; gap: 12px; padding: 10px 0;
+    border-bottom: 1px solid var(--line-soft);
+    align-items: flex-start;
+  }
+  .event-item:last-child { border-bottom: none; }
+  .event-date-block {
+    min-width: 44px; text-align: center;
+    border-radius: 6px; padding: 4px 6px;
+    background: var(--bg-2);
+    border: 1px solid var(--line-soft);
+  }
+  .event-date-block .day-num { font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.1; }
+  .event-date-block .month { font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-muted); font-weight: 700; margin-top: 1px; }
+  .event-info { flex: 1; min-width: 0; padding-top: 2px; }
+  .event-title { font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 2px; line-height: 1.3; }
+  .event-meta { font-size: 11px; color: var(--ink-muted); }
+  .event-tag {
+    display: inline-block;
+    font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em;
+    font-weight: 700; padding: 2px 6px; border-radius: 3px;
+    margin-top: 4px; color: #fff;
+  }
+  .event-tag.feriado { background: var(--c-feriado); }
+  .event-tag.recesso { background: var(--c-recesso); }
+  .event-tag.ferias  { background: var(--c-ferias); color: #03171c; }
+  .event-tag.dayoff  { background: var(--c-dayoff); }
+  .event-tag.evento  { background: var(--c-evento); color: #052e0f; }
+
+  /* MONTH VIEW */
+  .month-view {
+    display: none;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .month-view.active { display: block; }
+  .annual-view.hidden { display: none; }
+
+  .month-view-header {
+    padding: 22px 28px;
+    border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 16px; flex-wrap: wrap;
+    background: linear-gradient(180deg, rgba(6,182,212,0.06) 0%, transparent 100%);
+  }
+  .month-view-title { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; }
+  .month-view-title .year { color: var(--ink-muted); font-weight: 400; margin-left: 6px; }
+
+  .full-cal { display: grid; grid-template-columns: repeat(7, 1fr); }
+  .full-cal .full-dow {
+    font-size: 10px; text-align: center;
+    color: var(--ink-muted); font-weight: 700; letter-spacing: 0.12em;
+    padding: 12px 4px;
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--line);
+  }
+  .full-cal .full-day {
+    min-height: 110px; padding: 8px;
+    border-right: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--line-soft);
+    background: var(--panel);
+  }
+  .full-cal .full-day:nth-child(7n+7) { border-right: none; }
+  .full-cal .full-day.empty { background: rgba(15,26,46,0.5); }
+  .full-cal .full-day.weekend { background: var(--bg-2); }
+
+  .day-number {
+    font-size: 14px; font-weight: 700;
+    color: var(--ink); margin-bottom: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .full-cal .full-day.weekend .day-number { color: var(--ink-muted); }
+
+  .day-events { display: flex; flex-direction: column; gap: 3px; }
+  .day-event {
+    font-size: 10px; padding: 3px 6px; border-radius: 4px;
+    line-height: 1.3; font-weight: 600;
+    cursor: help; color: #fff;
+  }
+  .day-event.feriado { background: var(--c-feriado); }
+  .day-event.recesso { background: var(--c-recesso); }
+  .day-event.ferias  { background: var(--c-ferias); color: #03171c; }
+  .day-event.dayoff  { background: var(--c-dayoff); }
+  .day-event.evento  { background: var(--c-evento); color: #052e0f; }
+  .day-event.dimmed  { opacity: 0.3; }
+  .day-event.highlight { box-shadow: 0 0 0 2px #fff; }
+
+  /* TOOLTIP */
+  .tooltip {
+    position: fixed;
+    background: #050a14;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 12px; line-height: 1.5;
+    pointer-events: none;
+    z-index: 1000;
+    max-width: 300px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    opacity: 0;
+    transition: opacity 0.12s;
+  }
+  .tooltip.visible { opacity: 1; }
+  .tooltip strong { display: block; margin-bottom: 4px; color: #fff; font-size: 13px; font-weight: 700; }
+  .tooltip ul { list-style: none; margin-top: 4px; }
+  .tooltip li { padding: 2px 0; font-size: 11px; color: var(--ink-soft); }
+  .tooltip .tag {
+    display: inline-block;
+    font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em;
+    font-weight: 700; padding: 2px 6px; border-radius: 3px;
+    margin-bottom: 4px;
+  }
+  .tooltip .tag.feriado { background: var(--c-feriado); color: #fff; }
+  .tooltip .tag.recesso { background: var(--c-recesso); color: #fff; }
+  .tooltip .tag.ferias  { background: var(--c-ferias); color: #03171c; }
+  .tooltip .tag.dayoff  { background: var(--c-dayoff); color: #fff; }
+  .tooltip .tag.evento  { background: var(--c-evento); color: #052e0f; }
+  .tooltip .date-line { color: var(--ink-muted); font-size: 11px; margin-top: 2px; }
+  .tooltip .ev-block { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+  .tooltip .ev-block:first-of-type { margin-top: 6px; padding-top: 0; border-top: none; }
+
+  /* RESPONSIVO */
+  @media (max-width: 1100px) {
+    .annual-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 760px) {
+    .header { padding: 16px 20px; }
+    .legend-bar { padding: 12px 20px; }
+    .layout { padding: 20px; }
+    .annual-grid { grid-template-columns: repeat(2, 1fr); }
+    select.filter { min-width: 100%; }
+    .controls { width: 100%; }
+    .select-wrap { flex: 1; }
+    .full-cal .full-day { min-height: 70px; padding: 5px; }
+    .day-number { font-size: 12px; }
+    .day-event { font-size: 9px; padding: 2px 4px; }
+    .month-view-title { font-size: 20px; }
+  }
+  @media (max-width: 480px) {
+    .annual-grid { grid-template-columns: 1fr; }
+  }
+
+  .events-list::-webkit-scrollbar { width: 6px; }
+  .events-list::-webkit-scrollbar-track { background: transparent; }
+  .events-list::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+  .events-list::-webkit-scrollbar-thumb:hover { background: var(--ink-muted); }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark">B</div>
+      <div class="brand-text">
+        <h1>Branddi · Calendário 2026</h1>
+        <div class="sub">Planejamento anual · Feriados, recessos e equipe</div>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="select-wrap">
+        <select id="filter-collab" class="filter" aria-label="Filtrar colaborador">
+          <option value="">Todos os colaboradores</option>
+        </select>
+      </div>
+      <button id="btn-back" class="btn primary" style="display:none;">← Voltar</button>
+    </div>
+  </div>
+</header>
+
+<div class="legend-bar">
+  <div class="legend-inner">
+    <span class="legend-label">Legenda</span>
+    <div class="legend-item"><span class="legend-dot feriado"></span> Feriado nacional</div>
+    <div class="legend-item"><span class="legend-dot recesso"></span> Recesso da empresa</div>
+    <div class="legend-item"><span class="legend-dot ferias"></span> Férias do colaborador</div>
+    <div class="legend-item"><span class="legend-dot dayoff"></span> Day off</div>
+    <div class="legend-item"><span class="legend-dot evento"></span> Evento corporativo</div>
+  </div>
+</div>
+
+<main class="layout">
+  <section>
+    <div id="annual-view" class="annual-view">
+      <div class="annual-grid" id="annual-grid"></div>
+    </div>
+    <div id="month-view" class="month-view">
+      <div class="month-view-header">
+        <div class="month-view-title" id="month-view-title"></div>
+      </div>
+      <div class="full-cal" id="full-cal"></div>
+    </div>
+  </section>
+</main>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+'use strict';
+
+const YEAR = 2026;
+const MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                     'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const MONTH_SHORT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const DOW_SHORT = ['D','S','T','Q','Q','S','S'];
+const TYPE_LABEL = { feriado:'Feriado', recesso:'Recesso', ferias:'Férias', dayoff:'Day off', evento:'Evento' };
+
+const COLABORADORES = [
+  'Laura Alves','Keila Jaques','Maria Eduarda','Lívia Silva','Julia Roschel',
+  'Aline Costa','Julia Camargo','Amaore Moises','Ana Paula Rodrigues',
+  'Ana Vitória Sena','Beatriz Santos','Caroline Macedo','Everton Marques',
+  'Giovanna Araujo','Helen Portugal','Igor Melauro','Railanne Araujo','Yasmim Souza'
+];
+
+const EVENTOS = [
+  // Feriados nacionais e recessos
+  { type:'feriado', start:'2026-01-01', end:'2026-01-01', title:'Ano Novo' },
+  { type:'feriado', start:'2026-02-16', end:'2026-02-16', title:'Carnaval' },
+  { type:'feriado', start:'2026-02-17', end:'2026-02-17', title:'Carnaval' },
+  { type:'recesso', start:'2026-02-18', end:'2026-02-18', title:'Quarta-feira de Cinzas (Recesso da empresa)' },
+  { type:'feriado', start:'2026-04-03', end:'2026-04-03', title:'Sexta-feira Santa' },
+  { type:'feriado', start:'2026-04-21', end:'2026-04-21', title:'Tiradentes' },
+  { type:'feriado', start:'2026-05-01', end:'2026-05-01', title:'Dia do Trabalho' },
+  { type:'feriado', start:'2026-06-04', end:'2026-06-04', title:'Corpus Christi' },
+  { type:'feriado', start:'2026-09-07', end:'2026-09-07', title:'Independência do Brasil' },
+  { type:'feriado', start:'2026-10-12', end:'2026-10-12', title:'Nossa Senhora Aparecida' },
+  { type:'feriado', start:'2026-11-02', end:'2026-11-02', title:'Finados' },
+  { type:'recesso', start:'2026-12-21', end:'2026-12-31', title:'Recesso geral da empresa' },
+
+  // Férias / Dayoff de colaboradores
+  { type:'ferias', start:'2026-05-11', end:'2026-05-20', title:'Férias',  collab:'Keila Jaques' },
+  { type:'dayoff', start:'2026-05-21', end:'2026-05-21', title:'Day off', collab:'Keila Jaques' },
+  { type:'dayoff', start:'2026-04-17', end:'2026-04-17', title:'Day off', collab:'Giovanna Araujo' },
+  { type:'dayoff', start:'2026-04-20', end:'2026-04-20', title:'Day off', collab:'Giovanna Araujo' },
+
+  // Adicionais
+  { type:'evento', start:'2026-07-27', end:'2026-07-31', title:'Fórum E-commerce' },
+  { type:'ferias', start:'2026-07-31', end:'2026-08-29', title:'Férias',  collab:'Julia Roschel' },
+  { type:'dayoff', start:'2026-08-21', end:'2026-08-21', title:'Day off', collab:'Maria Eduarda' }
+];
+
+/* Utils */
+function parseDate(s){const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
+function fmt(d){return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');}
+function fmtFull(d){return fmt(d)+'/'+d.getFullYear();}
+function dKey(y,m,d){return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
+function dKeyD(d){return dKey(d.getFullYear(),d.getMonth(),d.getDate());}
+function eachDay(s,e){const out=[];const c=new Date(s);while(c<=e){out.push(new Date(c));c.setDate(c.getDate()+1);}return out;}
+
+/* Index */
+const eventsByDay = new Map();
+EVENTOS.forEach(ev => {
+  const s=parseDate(ev.start), e=parseDate(ev.end);
+  eachDay(s,e).forEach(d => {
+    if (d.getFullYear()!==YEAR) return;
+    const k=dKeyD(d);
+    if (!eventsByDay.has(k)) eventsByDay.set(k,[]);
+    eventsByDay.get(k).push(ev);
+  });
+});
+
+/* Filtro */
+function populateFilter() {
+  const sel = document.getElementById('filter-collab');
+  COLABORADORES.slice().sort((a,b)=>a.localeCompare(b,'pt-BR')).forEach(n=>{
+    const o=document.createElement('option'); o.value=n; o.textContent=n; sel.appendChild(o);
+  });
+}
+
+/* Próximos eventos */
+function renderUpcoming() {
+  const list = document.getElementById('events-list');
+  list.innerHTML = '';
+  const today = new Date();
+  const ref = today < new Date(YEAR,0,1) ? new Date(YEAR,0,1) : today;
+  let items = EVENTOS.slice()
+    .map(ev => ({...ev, _s:parseDate(ev.start), _e:parseDate(ev.end)}))
+    .filter(ev => ev._e >= ref)
+    .sort((a,b) => a._s - b._s);
+  if (items.length === 0) {
+    items = EVENTOS.map(ev => ({...ev, _s:parseDate(ev.start), _e:parseDate(ev.end)}))
+      .sort((a,b)=>a._s-b._s);
+  }
+  items.slice(0, 25).forEach(ev => {
+    const item = document.createElement('div');
+    item.className = 'event-item';
+    const isRange = ev.start !== ev.end;
+    const titleText = ev.collab ? `${ev.title} — ${ev.collab}` : ev.title;
+    const meta = isRange ? `${fmt(ev._s)} até ${fmt(ev._e)}` : fmtFull(ev._s);
+    item.innerHTML = `
+      <div class="event-date-block">
+        <div class="day-num">${String(ev._s.getDate()).padStart(2,'0')}</div>
+        <div class="month">${MONTH_SHORT[ev._s.getMonth()]}</div>
+      </div>
+      <div class="event-info">
+        <div class="event-title">${titleText}</div>
+        <div class="event-meta">${meta}</div>
+        <span class="event-tag ${ev.type}">${TYPE_LABEL[ev.type]}</span>
+      </div>`;
+    list.appendChild(item);
+  });
+  if (items.length === 0) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--ink-muted);padding:8px 0;">Nenhum evento agendado.</div>';
+  }
+}
+
+/* Cor dominante p/ mini-cal */
+const PRIORITY = { feriado:1, recesso:2, ferias:3, dayoff:4, evento:5 };
+const COLOR_VAR = {
+  feriado:'var(--c-feriado)', recesso:'var(--c-recesso)',
+  ferias:'var(--c-ferias)',  dayoff:'var(--c-dayoff)', evento:'var(--c-evento)'
+};
+function dayCellInfo(evs) {
+  if (!evs || !evs.length) return { type:null };
+  const cats = [...new Set(evs.map(e=>e.type))].sort((a,b)=>PRIORITY[a]-PRIORITY[b]);
+  if (cats.length >= 2) return { type:'multi', cats };
+  return { type: cats[0] };
+}
+
+/* Tooltip helpers */
+function buildTooltipHTML(evs, date) {
+  if (!evs || !evs.length) return '';
+  let html = `<strong>${fmtFull(date)}</strong>`;
+  evs.forEach(ev => {
+    const titleLine = ev.collab ? `${ev.title} — ${ev.collab}` : ev.title;
+    const period = ev.start !== ev.end
+      ? `<div class="date-line">${fmt(parseDate(ev.start))} até ${fmt(parseDate(ev.end))}</div>` : '';
+    html += `<div class="ev-block"><span class="tag ${ev.type}">${TYPE_LABEL[ev.type]}</span><br>${titleLine}${period}</div>`;
+  });
+  return html;
+}
+function buildMonthFeriasTooltip(ferias) {
+  let html = '<strong>Férias neste mês</strong><ul>';
+  ferias.forEach(f => {
+    html += `<li>• ${f.collab} — ${fmt(f._s)} até ${fmt(f._e)}</li>`;
+  });
+  html += '</ul>';
+  return html;
+}
+
+/* Coleta férias do mês */
+function collectMonthFerias(m) {
+  const out = [];
+  EVENTOS.forEach(ev => {
+    if (ev.type !== 'ferias') return;
+    const s=parseDate(ev.start), e=parseDate(ev.end);
+    const ms=new Date(YEAR,m,1), me=new Date(YEAR,m+1,0);
+    if (e<ms || s>me) return;
+    out.push({ ...ev, _s:s, _e:e });
+  });
+  return out;
+}
+
+/* Render anual */
+function renderAnnual() {
+  const grid = document.getElementById('annual-grid');
+  grid.innerHTML = '';
+  const filter = document.getElementById('filter-collab').value;
+
+  for (let m=0; m<12; m++) {
+    const card = document.createElement('div');
+    card.className = 'month-card';
+    card.dataset.month = m;
+    card.setAttribute('role','button');
+    card.setAttribute('tabindex','0');
+
+    let html = `<div class="month-name">${MONTH_NAMES[m].toUpperCase()}</div><div class="mini-cal">`;
+    DOW_SHORT.forEach(d => html += `<div class="dow">${d}</div>`);
+
+    const firstDay = new Date(YEAR,m,1).getDay();
+    const daysInMonth = new Date(YEAR,m+1,0).getDate();
+
+    // dias do mês anterior (cinza)
+    for (let i = firstDay; i > 0; i--) {
+      const d = new Date(YEAR, m, 1 - i);
+      html += `<div class="day empty">${d.getDate()}</div>`;
+    }
+
+    // dias do mês
+    for (let d=1; d<=daysInMonth; d++) {
+      const k = dKey(YEAR,m,d);
+      const evs = eventsByDay.get(k) || [];
+      const info = dayCellInfo(evs);
+      let cls = 'day';
+      let style = '';
+      if (info.type === 'multi') {
+        cls += ' has-event';
+        const c1 = COLOR_VAR[info.cats[0]];
+        const c2 = COLOR_VAR[info.cats[1]];
+        style = `background:linear-gradient(135deg, ${c1} 0%, ${c1} 50%, ${c2} 50%, ${c2} 100%); color:#fff;`;
+      } else if (info.type) {
+        cls += ' has-event ' + info.type;
+      }
+      if (filter && evs.some(e => e.collab === filter)) cls += ' collab-match';
+
+      const tipHTML = encodeURIComponent(buildTooltipHTML(evs, new Date(YEAR,m,d)));
+      const tipAttr = evs.length ? `data-tip="${tipHTML}"` : '';
+      const styleAttr = style ? `style="${style}"` : '';
+      html += `<div class="${cls}" ${styleAttr} ${tipAttr}>${d}</div>`;
+    }
+
+    // próximas semanas até completar 6 linhas (42 células)
+    const total = firstDay + daysInMonth;
+    const remaining = 42 - total;
+    for (let i=1; i<=remaining; i++) {
+      html += `<div class="day empty">${i}</div>`;
+    }
+    html += '</div>';
+
+    // banner de férias
+    const monthFerias = collectMonthFerias(m);
+    if (monthFerias.length > 0) {
+      const tipHTML = encodeURIComponent(buildMonthFeriasTooltip(monthFerias));
+      const txt = monthFerias.length === 1
+        ? `🧳 Férias neste mês`
+        : `🧳 ${monthFerias.length} colaboradores de férias`;
+      html += `<div class="ferias-banner" data-tip-month="${tipHTML}">${txt}</div>`;
+    }
+
+    card.innerHTML = html;
+    grid.appendChild(card);
+    card.addEventListener('click', () => openMonth(m));
+    card.addEventListener('keydown', e => {
+      if (e.key==='Enter'||e.key===' ') { e.preventDefault(); openMonth(m); }
+    });
+  }
+  attachTooltips();
+}
+
+/* Render mensal expandido */
+function openMonth(m) {
+  document.getElementById('annual-view').classList.add('hidden');
+  document.getElementById('month-view').classList.add('active');
+  document.getElementById('btn-back').style.display = 'inline-flex';
+
+  document.getElementById('month-view-title').innerHTML =
+    `${MONTH_NAMES[m]} <span class="year">${YEAR}</span>`;
+
+  const cal = document.getElementById('full-cal');
+  cal.innerHTML = '';
+  ['DOM','SEG','TER','QUA','QUI','SEX','SÁB'].forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'full-dow'; el.textContent = d;
+    cal.appendChild(el);
+  });
+
+  const firstDay = new Date(YEAR,m,1).getDay();
+  const daysInMonth = new Date(YEAR,m+1,0).getDate();
+
+  for (let i=0; i<firstDay; i++) {
+    const e = document.createElement('div');
+    e.className = 'full-day empty';
+    cal.appendChild(e);
+  }
+
+  const filter = document.getElementById('filter-collab').value;
+
+  for (let d=1; d<=daysInMonth; d++) {
+    const cell = document.createElement('div');
+    const date = new Date(YEAR,m,d);
+    const isWeekend = date.getDay()===0 || date.getDay()===6;
+    cell.className = 'full-day' + (isWeekend ? ' weekend' : '');
+
+    const k = dKey(YEAR,m,d);
+    const evs = eventsByDay.get(k) || [];
+
+    let html = `<div class="day-number">${d}</div><div class="day-events">`;
+    evs.forEach(ev => {
+      const label = ev.collab ? `${ev.title} – ${ev.collab}` : ev.title;
+      const dim = filter && ev.collab && ev.collab !== filter ? ' dimmed' : '';
+      const hi  = filter && ev.collab === filter ? ' highlight' : '';
+      let tip = `<strong>${label}</strong>`;
+      tip += `<span class="tag ${ev.type}">${TYPE_LABEL[ev.type]}</span>`;
+      if (ev.start === ev.end) tip += `<div class="date-line">${fmtFull(parseDate(ev.start))}</div>`;
+      else tip += `<div class="date-line">${fmtFull(parseDate(ev.start))} até ${fmtFull(parseDate(ev.end))}</div>`;
+      html += `<div class="day-event ${ev.type}${dim}${hi}" data-tip="${encodeURIComponent(tip)}">${label}</div>`;
+    });
+    html += '</div>';
+    cell.innerHTML = html;
+    cal.appendChild(cell);
+  }
+
+  const total = firstDay + daysInMonth;
+  const rem = total % 7;
+  if (rem !== 0) {
+    for (let i=0; i<7-rem; i++) {
+      const e = document.createElement('div');
+      e.className = 'full-day empty';
+      cal.appendChild(e);
+    }
+  }
+  attachTooltips();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function backToAnnual() {
+  document.getElementById('annual-view').classList.remove('hidden');
+  document.getElementById('month-view').classList.remove('active');
+  document.getElementById('btn-back').style.display = 'none';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* Tooltip */
+const tooltipEl = document.getElementById('tooltip');
+function showTooltip(html, x, y) {
+  if (!html) return;
+  tooltipEl.innerHTML = html;
+  tooltipEl.classList.add('visible');
+  const rect = tooltipEl.getBoundingClientRect();
+  let left = x + 14;
+  let top = y + 14;
+  if (left + rect.width > window.innerWidth - 10) left = x - rect.width - 14;
+  if (top + rect.height > window.innerHeight - 10) top = y - rect.height - 14;
+  tooltipEl.style.left = Math.max(8, left) + 'px';
+  tooltipEl.style.top  = Math.max(8, top) + 'px';
+}
+function hideTooltip() { tooltipEl.classList.remove('visible'); }
+
+function attachTooltips() {
+  document.querySelectorAll('[data-tip]').forEach(el => {
+    const html = decodeURIComponent(el.dataset.tip || '');
+    if (!html) return;
+    el.addEventListener('mouseenter', e => showTooltip(html, e.clientX, e.clientY));
+    el.addEventListener('mousemove',  e => showTooltip(html, e.clientX, e.clientY));
+    el.addEventListener('mouseleave', hideTooltip);
+  });
+  document.querySelectorAll('[data-tip-month]').forEach(el => {
+    const html = decodeURIComponent(el.dataset.tipMonth);
+    el.addEventListener('mouseenter', e => showTooltip(html, e.clientX, e.clientY));
+    el.addEventListener('mousemove',  e => showTooltip(html, e.clientX, e.clientY));
+    el.addEventListener('mouseleave', hideTooltip);
+  });
+}
+
+/* Eventos */
+document.getElementById('btn-back').addEventListener('click', backToAnnual);
+document.getElementById('filter-collab').addEventListener('change', () => {
+  const monthActive = document.getElementById('month-view').classList.contains('active');
+  if (monthActive) {
+    const t = document.getElementById('month-view-title').textContent;
+    const m = MONTH_NAMES.findIndex(n => t.startsWith(n));
+    if (m >= 0) openMonth(m);
+  }
+  renderAnnual();
+});
+
+/* Init */
+populateFilter();
+renderAnnual();
+</script>
+</body>
+</html>
